@@ -1,0 +1,12 @@
+{
+  "name": "excel-csv-aggregator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "フォルダ内の CSV を読み、年月 × 商品の集計表を新しいブックに作る Excel VBA マクロ（Node.js の参照実装とテスト付き）",
+  "scripts": {
+    "test": "node --test",
+    "build": "node scripts/build-bas.js"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

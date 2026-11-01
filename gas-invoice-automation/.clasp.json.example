@@ -1,0 +1,4 @@
+{
+  "scriptId": "ここに自分のスクリプトIDを入れる（このファイルを .clasp.json にコピー。.clasp.json は公開しない）",
+  "rootDir": "src"
+}

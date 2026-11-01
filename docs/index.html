@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>halka — 業務自動化（Google Apps Script）</title>
+<meta name="description" content="Google Apps Script（GAS）で、問い合わせ対応・請求書作成・データ集計などの定型業務を自動化します。制作物はすべて自主制作で、テストと確認状況を公開しています。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #eceef0;
+  --surface: #f6f7f8;
+  --ink: #15181b;
+  --ink-2: #4a5157;
+  --ink-3: #7b838a;
+  --rule: #c9ced3;
+  --rule-strong: #15181b;
+  --ok: #2f6b4f;
+  --wip: #8a6a1f;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --sans: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131619;
+    --surface: #1a1e22;
+    --ink: #e4e7ea;
+    --ink-2: #a9b0b6;
+    --ink-3: #78818a;
+    --rule: #2c3238;
+    --rule-strong: #e4e7ea;
+    --ok: #7cc4a0;
+    --wip: #d9b25e;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.85 var(--sans);
+  font-feature-settings: "palt";
+}
+a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--rule); transition: border-color .15s; }
+a:hover { border-bottom-color: var(--ink); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+.mono { font-family: var(--mono); font-feature-settings: normal; }
+.tbd { border-bottom: 1px dashed var(--wip); color: var(--wip); }
+
+/* header */
+.top { border-bottom: 1px solid var(--rule); }
+.top .wrap { display: flex; justify-content: space-between; align-items: center; height: 56px; font-size: 13px; }
+.top nav { display: flex; gap: 24px; }
+.top nav a { border: 0; color: var(--ink-2); }
+.top nav a:hover { color: var(--ink); }
+.status { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+
+/* hero */
+.hero { padding: 96px 0 72px; border-bottom: 1px solid var(--rule-strong); }
+.hero .grid { display: grid; grid-template-columns: 7fr 4fr; gap: 64px; align-items: end; }
+.hero h1 { margin: 0; font-size: clamp(34px, 5.4vw, 64px); line-height: 1.22; font-weight: 700; letter-spacing: -0.01em; }
+.hero h1 span { color: var(--ink-3); }
+.hero p { margin: 0; color: var(--ink-2); }
+.facts { margin: 56px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--rule); }
+.facts div { padding: 14px 16px 0 0; }
+.facts dt { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; }
+.facts dd { margin: 2px 0 0; font-size: 14px; }
+
+/* sections */
+section.block { display: grid; grid-template-columns: 220px 1fr; gap: 48px; padding: 72px 0; border-bottom: 1px solid var(--rule); }
+.label { position: sticky; top: 24px; align-self: start; }
+.label .no { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+.label h2 { margin: 4px 0 0; font-size: 20px; font-weight: 700; }
+.label p { margin: 8px 0 0; font-size: 13px; color: var(--ink-3); line-height: 1.7; }
+
+/* services */
+.svc { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule-strong); }
+.svc > div { padding: 20px 24px 24px 0; border-bottom: 1px solid var(--rule); }
+.svc > div:nth-child(odd) { border-right: 1px solid var(--rule); }
+.svc > div:nth-child(even) { padding-left: 24px; }
+.svc h3 { margin: 0 0 8px; font-size: 16px; }
+.svc h3 small { font-family: var(--mono); font-weight: 400; font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+.svc ul { margin: 0; padding: 0; list-style: none; color: var(--ink-2); font-size: 14px; }
+.svc li::before { content: "— "; color: var(--ink-3); }
+.svc > div.no-go { grid-column: 1 / -1; border-right: 0; padding-left: 0; }
+.svc .no-go h3 { color: var(--ink-3); }
+
+/* works */
+.work { border-top: 1px solid var(--rule-strong); padding: 28px 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.work + .work { border-top: 1px solid var(--rule); }
+.work .meta { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+.work h3 { margin: 4px 0 12px; font-size: 22px; line-height: 1.4; }
+.work p { margin: 0 0 16px; color: var(--ink-2); }
+.work .stack { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+.ledger { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+.ledger caption { text-align: left; font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; padding-bottom: 6px; }
+.ledger td { padding: 7px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+.ledger td:last-child { text-align: right; font-family: var(--mono); white-space: nowrap; padding-left: 16px; }
+.ok { color: var(--ok); }
+.wip { color: var(--wip); }
+.shot { margin: 0; background: var(--surface); border: 1px solid var(--rule); padding: 16px; }
+.shot img { display: block; width: 100%; height: auto; background: #fff; }
+.shot figcaption { font-size: 12px; color: var(--ink-3); margin-top: 10px; line-height: 1.6; }
+.flow { margin: 0; padding: 0; list-style: none; counter-reset: s; font-size: 14px; color: var(--ink-2); }
+.flow li { counter-increment: s; padding: 6px 0 6px 36px; position: relative; border-top: 1px solid var(--rule); }
+.flow li::before { content: counter(s, decimal-leading-zero); position: absolute; left: 0; font-family: var(--mono); font-size: 12px; color: var(--ink-3); top: 8px; }
+.links { margin-top: 16px; font-size: 14px; display: flex; gap: 20px; flex-wrap: wrap; }
+
+/* process */
+.steps { display: grid; grid-template-columns: repeat(6, 1fr); border-top: 1px solid var(--rule-strong); }
+.steps > div { padding: 16px 16px 0 0; border-right: 1px solid var(--rule); }
+.steps > div + div { padding-left: 16px; }
+.steps > div:last-child { border-right: 0; }
+.steps .n { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+.steps h3 { margin: 2px 0 6px; font-size: 15px; }
+.steps p { margin: 0; font-size: 13px; color: var(--ink-2); line-height: 1.7; }
+
+/* rules list */
+.rules { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule-strong); }
+.rules li { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.rules strong { font-weight: 500; }
+.rules span { color: var(--ink-2); font-size: 14px; }
+
+.prose p { margin: 0 0 14px; color: var(--ink-2); max-width: 40em; }
+.prose p:first-child { color: var(--ink); }
+
+/* contact */
+.contact { padding: 96px 0; }
+.contact .grid { display: grid; grid-template-columns: 7fr 4fr; gap: 64px; align-items: end; }
+.contact h2 { margin: 0; font-size: clamp(28px, 4vw, 44px); line-height: 1.3; }
+.contact dl { margin: 0; border-top: 1px solid var(--rule-strong); }
+.contact dl div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 14px; }
+.contact dt { color: var(--ink-3); font-family: var(--mono); font-size: 12px; }
+footer { border-top: 1px solid var(--rule); }
+footer .wrap { display: flex; justify-content: space-between; padding-top: 20px; padding-bottom: 32px; font-size: 12px; color: var(--ink-3); font-family: var(--mono); }
+
+@media (max-width: 900px) {
+  .wrap { padding: 0 16px; }
+  .top nav { display: none; }
+  .hero { padding: 56px 0 48px; }
+  .hero .grid, .contact .grid, .work { grid-template-columns: 1fr; gap: 24px; }
+  .facts { grid-template-columns: 1fr 1fr; }
+  section.block { grid-template-columns: 1fr; gap: 24px; padding: 48px 0; }
+  .label { position: static; }
+  .svc { grid-template-columns: 1fr; }
+  .svc > div:nth-child(odd) { border-right: 0; }
+  .svc > div:nth-child(even) { padding-left: 0; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .steps > div, .steps > div + div { padding: 14px 12px 14px 0; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .rules li { grid-template-columns: 1fr; gap: 2px; }
+  .contact { padding: 56px 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <span class="mono">halka</span>
+    <nav>
+      <a href="#services">対応できること</a>
+      <a href="#works">制作物</a>
+      <a href="#process">進め方</a>
+      <a href="#contact">連絡</a>
+    </nav>
+    <span class="status"><span class="dot"></span>新規のご相談 受付中</span>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <div class="grid">
+        <h1>スプレッドシートの<br>「毎月の手作業」を、<br><span>仕組みに置き換える。</span></h1>
+        <p>Google Apps Script（GAS）で、問い合わせ対応・請求書作成・データの集計といった定型業務を自動化します。会社員として働きながら、平日の夜と土日に対応しています。</p>
+      </div>
+      <dl class="facts">
+        <div><dt>Stack</dt><dd>GAS / HTML・CSS</dd></div>
+        <div><dt>Hours</dt><dd>平日 夜・土日</dd></div>
+        <div><dt>Contact</dt><dd>ランサーズのメッセージ</dd></div>
+        <div><dt>Based in</dt><dd>日本・リモート</dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <section class="block" id="services">
+      <div class="label">
+        <div class="no">01</div>
+        <h2>対応できること</h2>
+        <p>小さく、範囲がはっきりした作業から。</p>
+      </div>
+      <div class="svc">
+        <div>
+          <h3>Google Apps Script<small>GAS</small></h3>
+          <ul>
+            <li>Google フォームの自動返信・担当者への通知</li>
+            <li>請求書・見積書の PDF 作成と Gmail 下書き</li>
+            <li>シート間の転記・集計・重複チェック</li>
+            <li>Gmail・カレンダー・ドライブとの連携</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Web<small>HTML / CSS</small></h3>
+          <ul>
+            <li>既存サイトの文言・レイアウトの修正</li>
+            <li>1 ページの簡単なページ制作</li>
+          </ul>
+        </div>
+        <div class="no-go">
+          <h3>お受けしていないこと</h3>
+          <ul>
+            <li>電話での対応</li>
+            <li>画像の加工・編集</li>
+            <li>納期が極端に短い案件、期限のない保守</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="works">
+      <div class="label">
+        <div class="no">02</div>
+        <h2>制作物</h2>
+        <p>すべて自主制作です。テストの件数と、実際の環境で確認したかどうかをそのまま載せています。</p>
+      </div>
+      <div>
+        <article class="work">
+          <div>
+            <div class="meta">W-01 / 自主制作 / 2026</div>
+            <h3>請求書 PDF の自動作成</h3>
+            <p>スプレッドシートに請求明細を入れてメニューを押すと、顧客ごとの請求書 PDF をドライブに保存し、PDF を添付した Gmail の下書きまで用意します。送信は人が確認してから行います。</p>
+            <ol class="flow">
+              <li>明細に 1 行でも不備があれば、1 枚も作らずに行番号つきで知らせる</li>
+              <li>消費税は税率ごとに 1 回だけ端数処理（インボイス制度のルール）</li>
+              <li>同じ月・同じ顧客には二重に発行しない</li>
+            </ol>
+            <div class="links">
+              <a href="https://github.com/Halka005/portfolio/tree/main/gas-invoice-automation">GitHub で見る →</a>
+            </div>
+          </div>
+          <div>
+            <figure class="shot">
+              <img src="assets/invoice-preview.png" alt="請求書のプレビュー。10% と 8% の対象額と消費税、合計 50,666 円が表示されている" width="794" height="1123" loading="lazy">
+              <figcaption>ダミーデータのテンプレートをブラウザ（Chromium）で表示した見た目。Google の PDF 変換での見た目は未確認です。</figcaption>
+            </figure>
+            <table class="ledger">
+              <caption>Verification</caption>
+              <tr><td>計算・入力チェックの単体テスト</td><td class="ok">16 / 16 pass</td></tr>
+              <tr><td>全体の流れの結合テスト（GAS を模擬）</td><td class="ok">15 / 15 pass</td></tr>
+              <tr><td>Google での動作確認用プログラムのテスト</td><td class="ok">53 / 53 pass</td></tr>
+              <tr><td>Google での主な流れ（PDF の作成と保存、金額、請求書番号の連番、二重発行の防止、お試しモード）</td><td class="ok">確認済み 2026-10-25</td></tr>
+              <tr><td>Gmail の下書きの作成</td><td class="wip">未確認</td></tr>
+              <tr><td>Google の PDF 変換での見た目</td><td class="wip">未確認</td></tr>
+            </table>
+            <p class="stack" style="margin-top:16px">Google Apps Script · Sheets · Drive · Gmail · node:test</p>
+          </div>
+        </article>
+
+        <article class="work">
+          <div>
+            <div class="meta">W-02 / 自主制作 / 2026</div>
+            <h3>問い合わせ・ヒアリング受付の自動化</h3>
+            <p>Google フォームに回答が届いたら、受付番号をつけて自動返信し、担当者へ通知します。回答シートに「未対応・対応中・完了・対応不要」のステータス列を追加して、対応漏れを防ぎます。</p>
+            <ol class="flow">
+              <li>最初はメールを送らない「お試しモード」で動く</li>
+              <li>同じ回答を 2 回処理しても、二重に送信しない</li>
+              <li>文面と通知先は「設定」シートで変更でき、コードを触らなくてよい</li>
+            </ol>
+            <div class="links">
+              <a href="https://github.com/Halka005/portfolio/tree/main/gas-inquiry-automation">GitHub で見る →</a>
+            </div>
+          </div>
+          <div>
+            <table class="ledger">
+              <caption>Verification</caption>
+              <tr><td>単体テスト</td><td class="ok">11 / 11 pass</td></tr>
+              <tr><td>全体の流れの結合テスト（GAS を模擬）</td><td class="ok">12 / 12 pass</td></tr>
+              <tr><td>Google での動作確認用プログラムのテスト</td><td class="ok">68 / 68 pass</td></tr>
+              <tr><td>Google での主な流れ（受付番号と管理列、お試しモードで送らない、二重に処理しない）</td><td class="ok">確認済み 2026-10-26</td></tr>
+              <tr><td>実際のメール送信（自動返信・担当者への通知）</td><td class="wip">未確認</td></tr>
+            </table>
+            <p class="stack" style="margin-top:16px">Google Apps Script · Forms · Sheets · MailApp · node:test</p>
+          </div>
+        </article>
+
+        <article class="work">
+          <div>
+            <div class="meta">W-03 / 自主制作 / 2026</div>
+            <h3>CSV の集計（Google ドライブ・GAS）</h3>
+            <p>Google ドライブのフォルダに入れた売上・注文の CSV を、メニュー 1 回で「年月 × 商品」の集計表にします。Shift_JIS と UTF-8 のファイルが混ざっていても、列の順番がファイルごとに違っていても読めるように作りました。元の CSV は読むだけで、書き換えません。Google の上では、動作確認用の自己テスト 19 項目がすべて通りました。本番のメニューからの実行は、いま確認しているところです。</p>
+            <ol class="flow">
+              <li>期間が重なる CSV を入れても、同じ行を二重に数えない</li>
+              <li>文字化けや、読めない日付・金額があれば、集計を作らずにファイル名と行番号を知らせる（すべての場合は捕まえられません）</li>
+              <li>作り直しの途中で止まっても、前回の集計結果を残す</li>
+            </ol>
+            <p style="margin-top:16px">集計のルールは Excel VBA 版と共通です（VBA 版は Excel での実行が未確認）。</p>
+            <div class="links">
+              <a href="https://github.com/Halka005/portfolio/tree/main/gas-csv-aggregator">GitHub で見る →</a>
+            </div>
+          </div>
+          <div>
+            <table class="ledger">
+              <caption>Verification</caption>
+              <tr><td>集計ルールのコピーの一致・読み込み順</td><td class="ok">6 / 6 pass</td></tr>
+              <tr><td>GAS 版の単体テスト</td><td class="ok">40 / 40 pass</td></tr>
+              <tr><td>全体の流れの結合テスト（GAS を模擬）</td><td class="ok">65 / 65 pass</td></tr>
+              <tr><td>共通テストケース（入力 CSV と手計算の期待値。GAS を模擬）</td><td class="ok">14 / 14 pass</td></tr>
+              <tr><td>Google での動作確認用プログラムのテスト</td><td class="ok">76 / 76 pass</td></tr>
+              <tr><td>Google での自己テスト（共通テストケースを本番の処理に流す 19 項目）</td><td class="ok">確認済み 2026-10-26</td></tr>
+              <tr><td>本番のメニューからの実行</td><td class="wip">確認中</td></tr>
+            </table>
+            <p class="stack" style="margin-top:16px">Google Apps Script · Drive · Sheets · node:test</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="block" id="process">
+      <div class="label">
+        <div class="no">03</div>
+        <h2>進め方</h2>
+        <p>やり取りはすべて文章で。決めたことは書面に残します。</p>
+      </div>
+      <div class="steps">
+        <div><div class="n">01</div><h3>ヒアリング</h3><p>今の作業の流れと、入力・出力の例を伺います。</p></div>
+        <div><div class="n">02</div><h3>仕様の確認</h3><p>何をどこまで作るかを書面にしてご確認いただきます。</p></div>
+        <div><div class="n">03</div><h3>お見積もり</h3><p>金額・納期・修正回数をお伝えします。</p></div>
+        <div><div class="n">04</div><h3>制作・テスト</h3><p>ダミーデータで動作を確かめながら作ります。</p></div>
+        <div><div class="n">05</div><h3>納品</h3><p>操作手順書を付け、メッセージでご案内しながら、ご自身の環境で動かしていただきます。</p></div>
+        <div><div class="n">06</div><h3>フォロー</h3><p>1 週間後に、問題なく動いているかを確認します。</p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="label">
+        <div class="no">04</div>
+        <h2>作るときの約束</h2>
+      </div>
+      <ul class="rules">
+        <li><strong>お試しモードから始める</strong><span>メール送信などは最初は止めた状態で納品し、確認してから本番に切り替えます。</span></li>
+        <li><strong>二重に処理しない</strong><span>処理済みかどうかを記録し、何度実行しても同じ結果になるようにします。</span></li>
+        <li><strong>パスワードはお預かりしない</strong><span>スクリプトはご依頼者のアカウントで動かし、権限は必要な範囲に絞ります。</span></li>
+        <li><strong>確認していないことは書かない</strong><span>テストした範囲と、まだ確認していない範囲を分けてお伝えします。</span></li>
+        <li><strong>納品後の不具合対応</strong><span>納品から 10 日間に見つかった不具合は、無償で修正します。</span></li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <div class="label">
+        <div class="no">05</div>
+        <h2>経歴</h2>
+      </div>
+      <div class="prose">
+        <p>福祉の分野の会社で、開発部門に所属して約 1 年。プログラミングは独学で約 2 年続けています。</p>
+        <p>このページの制作物は、すべて自主制作です。</p>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="contact" id="contact">
+    <div class="wrap">
+      <div class="grid">
+        <h2>その作業、<br>一度見せてください。</h2>
+        <dl>
+          <div><dt>Lancers</dt><dd class="tbd">halka（公開プロフィールの URL を準備中）</dd></div>
+          <div><dt>GitHub</dt><dd><a href="https://github.com/Halka005">github.com/Halka005</a></dd></div>
+          <div><dt>Reply</dt><dd>24 時間以内</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 halka</span>
+    <span>制作物はすべて自主制作です</span>
+  </div>
+</footer>
+
+</body>
+</html>

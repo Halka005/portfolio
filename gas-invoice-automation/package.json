@@ -1,0 +1,13 @@
+{
+  "name": "gas-invoice-automation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "スプレッドシートの請求明細から請求書 PDF と Gmail 下書きを作る Google Apps Script",
+  "scripts": {
+    "test": "node --test",
+    "preview": "node scripts/preview.js",
+    "push": "clasp push"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

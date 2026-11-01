@@ -1,0 +1,12 @@
+{
+  "encoding": "Shift_JIS",
+  "dedupe": true,
+  "quoteCheck": true,
+  "colNames": {
+    "date": "date",
+    "product": "item",
+    "quantity": "qty",
+    "amount": "amount",
+    "orderId": ""
+  }
+}

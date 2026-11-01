@@ -1,0 +1,11 @@
+{
+  "encoding": "自動",
+  "dedupe": false,
+  "colNames": {
+    "date": "日付",
+    "product": "品名",
+    "quantity": "個数",
+    "amount": "売上",
+    "orderId": ""
+  }
+}

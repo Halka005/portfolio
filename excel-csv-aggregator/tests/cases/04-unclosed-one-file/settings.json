@@ -1,0 +1,11 @@
+{
+  "encoding": "自動",
+  "dedupe": true,
+  "colNames": {
+    "date": "注文日",
+    "product": "商品名",
+    "quantity": "数量",
+    "amount": "金額",
+    "orderId": ""
+  }
+}

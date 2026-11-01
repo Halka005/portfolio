@@ -1,0 +1,13 @@
+{
+  "name": "gas-csv-aggregator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Google ドライブのフォルダの CSV を読み、年月 × 商品の集計表を同じスプレッドシートに作る Google Apps Script（集計のルールは excel-csv-aggregator の参照実装を共有）",
+  "scripts": {
+    "test": "node --test",
+    "sync-lib": "node scripts/sync-lib.js",
+    "push": "clasp push"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

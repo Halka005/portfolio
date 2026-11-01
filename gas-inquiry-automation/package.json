@@ -1,0 +1,12 @@
+{
+  "name": "gas-inquiry-automation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Google フォームの問い合わせ受付を自動化する Google Apps Script",
+  "scripts": {
+    "test": "node --test",
+    "push": "clasp push"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

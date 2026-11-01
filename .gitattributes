@@ -1,0 +1,5 @@
+# 作品 C（Excel VBA）: バイト列をそのまま保つ（改行の変換をしない）
+# dist/*.bas は Shift_JIS・CRLF。差分は src/*.bas（UTF-8）で見る
+excel-csv-aggregator/dist/*.bas binary
+# テストケースの CSV は文字コード・改行の違いそのものを試すため、変換しない
+excel-csv-aggregator/tests/cases/** -text

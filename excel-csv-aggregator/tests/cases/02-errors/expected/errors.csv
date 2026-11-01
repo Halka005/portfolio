@@ -1,0 +1,9 @@
+﻿ファイル,行,内容
+v_utf16.csv,1,UTF-16 には対応していません。UTF-8 か Shift_JIS で保存し直してください
+w_unclosed-quote.csv,2,"引用符（""）が閉じていません。この行で始まった引用符がファイルの終わりまで続いているため、後ろの行を読めません"
+x_missing-column.csv,2,必要な列「数量」が見出しにありません
+y_bad-values.csv,4,「注文日」を日付として読めません: 2026/02/29
+y_bad-values.csv,5,「商品名」が空です
+y_bad-values.csv,5,「数量」を数値として読めません: abc
+y_bad-values.csv,6,「金額」が空です
+z_empty.csv,1,見出しの行がありません（空のファイル）
