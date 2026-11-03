@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [gas-inquiry-automation, gas-invoice-automation, excel-csv-aggregator, gas-csv-aggregator]
+        project: [gas-inquiry-automation, gas-invoice-automation, excel-csv-aggregator, gas-csv-aggregator, docs/hearing]
     defaults:
       run:
         working-directory: ${{ matrix.project }}
