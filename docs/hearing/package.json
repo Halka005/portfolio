@@ -1,0 +1,11 @@
+{
+  "name": "hearing",
+  "version": "0.1.0",
+  "private": true,
+  "description": "依頼者が答えるヒアリングのページ。入力はブラウザの中だけで扱い、ランサーズのメッセージに貼る文章を作る",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

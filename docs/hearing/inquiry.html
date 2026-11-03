@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>ヒアリング A 問い合わせ受付</title>
+<link rel="stylesheet" href="hearing.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="./" class="crumb">← ヒアリング</a>
+    <span class="crumb">A / 問い合わせ受付</span>
+  </div>
+</header>
+
+<main class="wrap" data-job="inquiry">
+  <div class="head">
+    <h1>問い合わせ受付の<br>ヒアリング</h1>
+    <p>作り始める前に、次のことを教えてください。答えると、ページのいちばん下に文章ができます。</p>
+    <p>名前・会社名・メールアドレスは見本の値で構いません。入力した内容は、このページの外には送られません。</p>
+    <p class="send">答えはランサーズのメッセージに貼って送ってください。</p>
+  </div>
+
+  <div class="q" data-q="plan">
+    <div class="qlabel"><span class="no">01</span><h2>プラン</h2><span class="tag req">必須</span></div>
+    <div>
+      <p class="hint">プランによって、下に出る質問が変わります。</p>
+      <div class="choices">
+        <label><input type="radio" name="plan" value="basic"> ベーシック<small>受付番号・通知</small></label>
+        <label><input type="radio" name="plan" value="standard"> スタンダード<small>＋自動返信</small></label>
+        <label><input type="radio" name="plan" value="premium"> プレミアム<small>＋振り分け</small></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="q" data-q="google_account">
+    <div class="qlabel"><span class="no">02</span><h2>Google アカウントの種類</h2><span class="tag req">必須</span></div>
+    <div>
+      <div class="choices">
+        <label><input type="radio" name="google_account" value="personal"> 個人のアカウント</label>
+        <label><input type="radio" name="google_account" value="workspace"> 会社・学校のアカウント</label>
+      </div>
+      <p class="hint">会社・学校のアカウントでは、管理者の設定によって承認できないことがあります。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="fields">
+    <div class="qlabel"><span class="no">03</span><h2>フォームの質問項目</h2><span class="tag req">必須</span></div>
+    <div>
+      <p class="hint">フォームに並んでいる質問名を、そのままの文字で書いてください。行は「行を足す」で増やせます。</p>
+      <div class="rows" data-initial='["", "", ""]'></div>
+      <template>
+        <div class="row">
+          <span class="n"></span>
+          <input type="text" data-part="name" aria-label="質問名" placeholder="例: お名前">
+          <select data-part="kind" aria-label="種類">
+            <option value="text">記述式</option>
+            <option value="paragraph">段落</option>
+            <option value="choice">ラジオボタン（1 つ選ぶ）</option>
+            <option value="checkbox">チェックボックス（複数選ぶ）</option>
+            <option value="dropdown">プルダウン</option>
+            <option value="date">日付</option>
+            <option value="other">その他</option>
+          </select>
+          <button type="button" class="small del">削除</button>
+        </div>
+      </template>
+      <button type="button" class="add">行を足す</button>
+    </div>
+  </div>
+
+  <div class="q" data-q="notify_to">
+    <div class="qlabel"><span class="no">04</span><h2>担当者への通知先</h2><span class="tag req">必須</span></div>
+    <div>
+      <input type="text" id="notify_to" inputmode="email" autocomplete="off" placeholder="例: tanto@example.com" aria-label="担当者への通知先">
+      <p class="hint">見本のアドレス（○○@example.com）にしてください。本番の宛先は、最後にご自身で設定していただきます。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="auto_reply_subject">
+    <div class="qlabel"><span class="no">05</span><h2>自動返信の件名</h2><span class="tag req">必須</span><span class="tag">スタンダード以上</span></div>
+    <div>
+      <input type="text" autocomplete="off" placeholder="例: お問い合わせを受け付けました" aria-label="自動返信の件名">
+    </div>
+  </div>
+
+  <div class="q" data-q="auto_reply_body">
+    <div class="qlabel"><span class="no">06</span><h2>自動返信の本文</h2><span class="tag req">必須</span><span class="tag">スタンダード以上</span></div>
+    <div>
+      <textarea aria-label="自動返信の本文" placeholder="例: 山田 太郎 様&#10;お問い合わせありがとうございます。2 営業日以内にご連絡します。&#10;見本株式会社"></textarea>
+      <p class="hint">問い合わせた人に届く文です。名前・会社名は見本の値で構いません。電話番号や URL は「（電話番号）」のように書いてください。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="id_format">
+    <div class="qlabel"><span class="no">07</span><h2>受付番号の形</h2><span class="tag">任意</span></div>
+    <div>
+      <input type="text" autocomplete="off" placeholder="例: INQ-20261026-001" aria-label="受付番号の形">
+      <p class="hint">希望がなければ空のままで構いません。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="routing">
+    <div class="qlabel"><span class="no">08</span><h2>振り分けの条件</h2><span class="tag req">必須</span><span class="tag">プレミアム</span></div>
+    <div>
+      <textarea aria-label="振り分けの条件" placeholder="例: 「お問い合わせの種類」が「見積もり」なら sales@example.com へ"></textarea>
+      <p class="hint">どの質問の、どの答えなら、どこへ知らせるかを書いてください。宛先は見本のアドレスで構いません。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="deadline">
+    <div class="qlabel"><span class="no">09</span><h2>希望の納期</h2><span class="tag">任意</span></div>
+    <div>
+      <input type="text" autocomplete="off" placeholder="例: 11 月 20 日ごろ" aria-label="希望の納期">
+      <p class="hint">ご購入時の納期より早めたいときなどに書いてください。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="notes">
+    <div class="qlabel"><span class="no">10</span><h2>そのほか</h2><span class="tag">任意</span></div>
+    <div>
+      <textarea aria-label="そのほか" placeholder="気になっていること、今のやり方で困っていることなど"></textarea>
+    </div>
+  </div>
+
+  <section class="out" aria-label="できた文章">
+    <div class="bar">
+      <button type="button" class="primary" id="build">文章を作る</button>
+      <button type="button" id="copy">コピー</button>
+      <span class="copied" id="copied" aria-live="polite"></span>
+    </div>
+    <div class="msg missing" id="missing" aria-live="polite"></div>
+    <div class="msg warn" id="warnings" aria-live="polite"></div>
+    <textarea id="out" readonly aria-label="ランサーズのメッセージに貼る文章" placeholder="「文章を作る」を押すと、ここに文章ができます。"></textarea>
+  </section>
+</main>
+
+<footer><div class="wrap">入力した内容は保存も送信もしません。ページを閉じると消えます。</div></footer>
+<script src="hearing-lib.js"></script>
+<script src="hearing-ui.js"></script>
+</body>
+</html>

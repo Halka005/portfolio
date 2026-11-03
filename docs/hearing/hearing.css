@@ -1,0 +1,135 @@
+/* ヒアリングのページ。トークンは docs/index.html と同じ。外部のフォントは読み込まない。 */
+:root {
+  --bg: #eceef0;
+  --surface: #f6f7f8;
+  --ink: #15181b;
+  --ink-2: #4a5157;
+  --ink-3: #7b838a;
+  --rule: #c9ced3;
+  --rule-strong: #15181b;
+  --ok: #2f6b4f;
+  --wip: #8a6a1f;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131619;
+    --surface: #1a1e22;
+    --ink: #e4e7ea;
+    --ink-2: #a9b0b6;
+    --ink-3: #78818a;
+    --rule: #2c3238;
+    --rule-strong: #e4e7ea;
+    --ok: #7cc4a0;
+    --wip: #d9b25e;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.85 var(--sans);
+  font-feature-settings: "palt";
+}
+a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--rule); transition: border-color .15s; }
+a:hover { border-bottom-color: var(--ink); }
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 32px; }
+.mono { font-family: var(--mono); font-feature-settings: normal; }
+[hidden] { display: none !important; }
+
+.top { border-bottom: 1px solid var(--rule); }
+.top .wrap { display: flex; justify-content: space-between; align-items: center; height: 56px; font-size: 13px; }
+.top .crumb { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+.head { padding: 56px 0 40px; border-bottom: 1px solid var(--rule-strong); }
+.head h1 { margin: 0 0 20px; font-size: clamp(26px, 4vw, 40px); line-height: 1.3; font-weight: 700; }
+.head p { margin: 0 0 8px; color: var(--ink-2); max-width: 40em; }
+.head p.send { color: var(--ink); font-weight: 500; }
+
+/* 質問の 1 行 */
+.q { display: grid; grid-template-columns: 240px 1fr; gap: 32px; padding: 28px 0; border-bottom: 1px solid var(--rule); }
+.q .qlabel .no { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+.q .qlabel h2 { margin: 2px 0 0; font-size: 16px; font-weight: 700; line-height: 1.5; }
+.q .qlabel .tag { display: inline-block; margin-top: 6px; margin-right: 6px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); border: 1px solid var(--rule); padding: 0 6px; }
+.q .qlabel .tag.req { color: var(--ink); border-color: var(--ink-3); }
+.q .hint { margin: 8px 0 0; font-size: 13px; color: var(--ink-3); line-height: 1.7; }
+.q .hint:first-child { margin-top: 0; margin-bottom: 8px; }
+.q.is-missing .qlabel h2::after { content: " — 未入力"; color: var(--wip); font-weight: 400; font-size: 13px; }
+.q.is-missing input[type="text"], .q.is-missing input[type="number"], .q.is-missing textarea { border-color: var(--wip); }
+
+input[type="text"], input[type="number"], textarea, select {
+  width: 100%;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 8px 10px;
+}
+input[type="number"] { width: 8em; }
+textarea { min-height: 7.5em; resize: vertical; line-height: 1.7; }
+input:focus, textarea:focus, select:focus, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+.choices { display: flex; flex-wrap: wrap; gap: 0; border-top: 1px solid var(--rule); }
+.choices label { display: flex; align-items: baseline; gap: 10px; width: 100%; padding: 8px 0; border-bottom: 1px solid var(--rule); cursor: pointer; }
+.choices label small { font-family: var(--mono); font-size: 12px; color: var(--ink-3); margin-left: auto; white-space: nowrap; }
+.choices.cols label { width: 50%; }
+.choices input { margin: 0; accent-color: var(--ink); }
+.inline-num { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+
+/* 行を足せる一覧 */
+.rows { border-top: 1px solid var(--rule); }
+.row { display: grid; grid-template-columns: 2.4em 1fr 15em auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.row.single { grid-template-columns: 2.4em 1fr auto; }
+.row .n { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+button {
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink-3);
+  border-radius: 2px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+button:hover { background: var(--surface); border-color: var(--ink); }
+button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 500; padding: 10px 22px; }
+button.primary:hover { opacity: .88; }
+button.small { font-size: 13px; padding: 3px 10px; color: var(--ink-2); border-color: var(--rule); }
+.add { margin-top: 10px; }
+
+/* 文章 */
+.out { padding: 40px 0 72px; }
+.out .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.msg { margin: 16px 0 0; font-size: 14px; }
+.msg:empty { display: none; }
+.msg ul { margin: 6px 0 0; padding-left: 1.2em; }
+.msg.missing { color: var(--wip); }
+.msg.warn { color: var(--ink-2); border-left: 2px solid var(--wip); padding-left: 12px; }
+.out textarea { margin-top: 20px; min-height: 22em; font-family: var(--mono); font-size: 13px; font-feature-settings: normal; }
+.copied { font-family: var(--mono); font-size: 12px; color: var(--ok); }
+
+/* 入り口 */
+.list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule-strong); }
+.list li { display: grid; grid-template-columns: 3em 1fr; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--rule); }
+.list .k { font-family: var(--mono); font-size: 12px; color: var(--ink-3); padding-top: 4px; }
+.list h2 { margin: 0; font-size: 18px; }
+.list p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
+
+footer { border-top: 1px solid var(--rule); }
+footer .wrap { padding-top: 20px; padding-bottom: 32px; font-size: 12px; color: var(--ink-3); font-family: var(--mono); }
+
+@media (max-width: 760px) {
+  .wrap { padding: 0 16px; }
+  .head { padding: 40px 0 32px; }
+  .q { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
+  .choices.cols label { width: 100%; }
+  .row { grid-template-columns: 1.8em 1fr auto; }
+  .row select { grid-column: 2 / 3; }
+  .row .del { grid-row: 1; grid-column: 3; }
+}

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>ヒアリング B 請求書 PDF</title>
+<link rel="stylesheet" href="hearing.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="./" class="crumb">← ヒアリング</a>
+    <span class="crumb">B / 請求書 PDF</span>
+  </div>
+</header>
+
+<main class="wrap" data-job="invoice">
+  <div class="head">
+    <h1>請求書 PDF の<br>ヒアリング</h1>
+    <p>作り始める前に、次のことを教えてください。答えると、ページのいちばん下に文章ができます。</p>
+    <p>名前・会社名・メールアドレス・金額は見本の値で構いません。入力した内容は、このページの外には送られません。</p>
+    <p class="send">答えはランサーズのメッセージに貼って送ってください。</p>
+  </div>
+
+  <div class="q" data-q="plan">
+    <div class="qlabel"><span class="no">01</span><h2>プラン</h2><span class="tag req">必須</span></div>
+    <div>
+      <p class="hint">プランによって、下に出る質問が変わります。</p>
+      <div class="choices">
+        <label><input type="radio" name="plan" value="basic"> ベーシック<small>PDF をドライブに保存</small></label>
+        <label><input type="radio" name="plan" value="standard"> スタンダード<small>＋Gmail の下書き</small></label>
+        <label><input type="radio" name="plan" value="premium"> プレミアム<small>＋ロゴ</small></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="q" data-q="google_account">
+    <div class="qlabel"><span class="no">02</span><h2>Google アカウントの種類</h2><span class="tag req">必須</span></div>
+    <div>
+      <div class="choices">
+        <label><input type="radio" name="google_account" value="personal"> 個人のアカウント</label>
+        <label><input type="radio" name="google_account" value="workspace"> 会社・学校のアカウント</label>
+      </div>
+      <p class="hint">会社・学校のアカウントでは、管理者の設定によって承認できないことがあります。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="sample">
+    <div class="qlabel"><span class="no">03</span><h2>今の請求書の見本</h2></div>
+    <div>
+      <p class="hint">PDF か画像を、ランサーズのメッセージに添付してください。宛名・金額は見本の値に置き換えてください。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="line_items">
+    <div class="qlabel"><span class="no">04</span><h2>明細の項目</h2><span class="tag req">必須</span></div>
+    <div>
+      <p class="hint">明細の表の列の名前です。今の明細に合わせて直してください。行は「行を足す」で増やせます。</p>
+      <div class="rows" data-initial='["請求月", "顧客", "品目", "数量", "単価", "税率"]'></div>
+      <template>
+        <div class="row single">
+          <span class="n"></span>
+          <input type="text" data-part="name" aria-label="明細の項目" placeholder="例: 品目">
+          <button type="button" class="small del">削除</button>
+        </div>
+      </template>
+      <button type="button" class="add">行を足す</button>
+    </div>
+  </div>
+
+  <div class="q" data-q="source">
+    <div class="qlabel"><span class="no">05</span><h2>今の明細の置き場所</h2><span class="tag req">必須</span></div>
+    <div>
+      <div class="choices">
+        <label><input type="radio" name="source" value="sheet"> Google スプレッドシート</label>
+        <label><input type="radio" name="source" value="excel"> Excel</label>
+        <label><input type="radio" name="source" value="other"> その他（「そのほか」に書いてください）</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="q" data-q="issuer_fields">
+    <div class="qlabel"><span class="no">06</span><h2>発行者の情報の項目</h2><span class="tag req">必須</span></div>
+    <div>
+      <p class="hint">請求書に載せる項目を選んでください。中身（住所など）は、ここには書かなくて構いません。</p>
+      <div class="choices cols">
+        <label><input type="checkbox" value="name"> 会社名・屋号</label>
+        <label><input type="checkbox" value="address"> 住所</label>
+        <label><input type="checkbox" value="phone"> 電話番号</label>
+        <label><input type="checkbox" value="email"> メールアドレス</label>
+        <label><input type="checkbox" value="registration_number"> 登録番号（インボイス）</label>
+        <label><input type="checkbox" value="bank"> 振込先</label>
+        <label><input type="checkbox" value="contact_person"> 担当者名</label>
+        <label><input type="checkbox" value="other"> その他（「そのほか」に）</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="q" data-q="due_rule">
+    <div class="qlabel"><span class="no">07</span><h2>支払期限</h2><span class="tag req">必須</span></div>
+    <div>
+      <div class="choices">
+        <label><input type="radio" name="due_rule" value="next_month_end"> 翌月末</label>
+        <label><input type="radio" name="due_rule" value="month_end"> 当月末</label>
+        <label><input type="radio" name="due_rule" value="days"> 発行日から◯日</label>
+        <label><input type="radio" name="due_rule" value="other"> その他（「そのほか」に書いてください）</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="q" data-q="due_days">
+    <div class="qlabel"><span class="no">07-2</span><h2>発行日から何日か</h2><span class="tag req">必須</span></div>
+    <div>
+      <div class="inline-num"><input type="number" min="1" max="365" step="1" inputmode="numeric" aria-label="発行日から何日か" placeholder="30"> 日</div>
+    </div>
+  </div>
+
+  <div class="q" data-q="rounding">
+    <div class="qlabel"><span class="no">08</span><h2>端数処理</h2><span class="tag req">必須</span></div>
+    <div>
+      <p class="hint">消費税の 1 円未満の扱いです。</p>
+      <div class="choices">
+        <label><input type="radio" name="rounding" value="floor"> 切り捨て</label>
+        <label><input type="radio" name="rounding" value="round"> 四捨五入</label>
+        <label><input type="radio" name="rounding" value="ceil"> 切り上げ</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="q" data-q="draft_subject">
+    <div class="qlabel"><span class="no">09</span><h2>下書きの件名</h2><span class="tag req">必須</span><span class="tag">スタンダード以上</span></div>
+    <div>
+      <input type="text" autocomplete="off" placeholder="例: 2026 年 11 月分のご請求書" aria-label="下書きの件名">
+    </div>
+  </div>
+
+  <div class="q" data-q="draft_body">
+    <div class="qlabel"><span class="no">10</span><h2>下書きの本文</h2><span class="tag req">必須</span><span class="tag">スタンダード以上</span></div>
+    <div>
+      <textarea aria-label="下書きの本文" placeholder="例: 見本商事 御中&#10;いつもお世話になっております。11 月分の請求書を添付します。&#10;見本株式会社"></textarea>
+      <p class="hint">PDF を添付した Gmail の下書きの文です。名前・会社名は見本の値で構いません。電話番号や URL は「（電話番号）」のように書いてください。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="logo">
+    <div class="qlabel"><span class="no">11</span><h2>ロゴを使うか</h2><span class="tag req">必須</span><span class="tag">プレミアム</span></div>
+    <div>
+      <div class="choices">
+        <label><input type="radio" name="logo" value="yes"> 使う</label>
+        <label><input type="radio" name="logo" value="no"> 使わない</label>
+      </div>
+      <p class="hint">使う場合は、ロゴの画像もランサーズのメッセージに添付してください。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="deadline">
+    <div class="qlabel"><span class="no">12</span><h2>希望の納期</h2><span class="tag">任意</span></div>
+    <div>
+      <input type="text" autocomplete="off" placeholder="例: 11 月 20 日ごろ" aria-label="希望の納期">
+      <p class="hint">ご購入時の納期より早めたいときなどに書いてください。</p>
+    </div>
+  </div>
+
+  <div class="q" data-q="notes">
+    <div class="qlabel"><span class="no">13</span><h2>そのほか</h2><span class="tag">任意</span></div>
+    <div>
+      <textarea aria-label="そのほか" placeholder="気になっていること、今のやり方で困っていることなど"></textarea>
+    </div>
+  </div>
+
+  <section class="out" aria-label="できた文章">
+    <div class="bar">
+      <button type="button" class="primary" id="build">文章を作る</button>
+      <button type="button" id="copy">コピー</button>
+      <span class="copied" id="copied" aria-live="polite"></span>
+    </div>
+    <div class="msg missing" id="missing" aria-live="polite"></div>
+    <div class="msg warn" id="warnings" aria-live="polite"></div>
+    <textarea id="out" readonly aria-label="ランサーズのメッセージに貼る文章" placeholder="「文章を作る」を押すと、ここに文章ができます。"></textarea>
+  </section>
+</main>
+
+<footer><div class="wrap">入力した内容は保存も送信もしません。ページを閉じると消えます。</div></footer>
+<script src="hearing-lib.js"></script>
+<script src="hearing-ui.js"></script>
+</body>
+</html>
