@@ -29,6 +29,31 @@
     add.addEventListener('click', () => { addRow(list, '').querySelector('[data-part="name"]').focus(); });
   });
 
+  // ---------- 質問名をまとめて貼って行にする ----------
+  const paste = document.getElementById('paste');
+  const pasteBtn = document.getElementById('paste-rows');
+  if (paste && pasteBtn) {
+    const pasted = document.getElementById('pasted');
+    pasteBtn.addEventListener('click', () => {
+      const list = pasteBtn.closest('[data-q]').querySelector('.rows');
+      const names = lib.parseQuestionLines(paste.value);
+      if (names.length === 0) { pasted.textContent = '貼られた質問名がありません'; return; }
+      // 空の行は置き換え、入力のある行は残してその後ろに足す（同じ名前は足さない）
+      const kept = [];
+      list.querySelectorAll('.row').forEach((r) => {
+        const v = r.querySelector('[data-part="name"]').value.trim();
+        if (v === '') r.remove(); else kept.push(v);
+      });
+      const added = names.filter((n) => !kept.includes(n));
+      added.forEach((n) => addRow(list, n));
+      renumber(list);
+      paste.value = '';
+      pasted.textContent = added.length + ' 件を行にしました';
+      const q = list.closest('[data-q]');
+      if (q) q.classList.remove('is-missing');
+    });
+  }
+
   // ---------- 入力を集める ----------
   function collect() {
     const a = {};
@@ -103,7 +128,8 @@
       const labels = new Set(r.missing);
       let first = null;
       for (const q of qs) {
-        if (!labels.has(q.label)) continue;
+        const bad = labels.has(q.label) || (q.type === 'url' && labels.has(lib.FORM_URL_INVALID));
+        if (!bad) continue;
         const el = box(q.key);
         if (el) { el.classList.add('is-missing'); if (!first) first = el; }
       }
