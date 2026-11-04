@@ -237,6 +237,91 @@ test('隠れている欄は注意の検査もしない', () => {
   assert.deepEqual(lib.findWarnings('inquiry', inquiry({ plan: 'basic', auto_reply_body: '03-1234-5678' })), []);
 });
 
+// ---------- 質問名のまとめて貼り付け ----------
+
+test('parseQuestionLines: 空の行・前後の空白・重複を除く', () => {
+  assert.deepEqual(lib.parseQuestionLines('  お名前 \n\n\tメールアドレス\r\nお名前\r\n   \nお問い合わせ内容'), ['お名前', 'メールアドレス', 'お問い合わせ内容']);
+  assert.deepEqual(lib.parseQuestionLines(''), []);
+  assert.deepEqual(lib.parseQuestionLines(undefined), []);
+  assert.deepEqual(lib.parseQuestionLines('\n \n'), []);
+});
+
+test('parseQuestionLines: 箇条書きの記号・番号と、末尾の必須の印を外す', () => {
+  const text = ['・お名前 *', '- メールアドレス*', '* 電話番号', '1. ご住所', '2) 会社名', '（3）部署名', '① お問い合わせの種類', '１．ご希望の日時 ＊', '• 備考', '- 1. 年齢'].join('\n');
+  assert.deepEqual(lib.parseQuestionLines(text), ['お名前', 'メールアドレス', '電話番号', 'ご住所', '会社名', '部署名', 'お問い合わせの種類', 'ご希望の日時', '備考', '年齢']);
+});
+
+test('parseQuestionLines: 質問名の中の数字や記号は残す', () => {
+  assert.deepEqual(lib.parseQuestionLines('2026年の予算\n1.5 倍にしたい理由\nA/B のどちら\n※注意事項'), ['2026年の予算', '1.5 倍にしたい理由', 'A/B のどちら', '※注意事項']);
+  assert.deepEqual(lib.parseQuestionLines('*\n・\n1.'), [], '記号だけの行は空の行として除く');
+});
+
+test('parseQuestionLines: 最大 30 件', () => {
+  const text = Array.from({ length: 40 }, (_, i) => '質問' + (i + 1)).join('\n');
+  const r = lib.parseQuestionLines(text);
+  assert.equal(lib.MAX_QUESTION_LINES, 30);
+  assert.equal(r.length, 30);
+  assert.equal(r[29], '質問30');
+  assert.equal(lib.parseQuestionLines('a\na\n' + text).length, 30, '重複は数えない');
+});
+
+// ---------- フォームの URL ----------
+
+const FORM = 'https://forms.gle/AbCdEf123';
+const FORM_LONG = 'https://docs.google.com/forms/d/e/1FAIpQLSexample/viewform';
+
+test('フォームの URL があれば、質問項目は空でも足りない欄にならない', () => {
+  const empty = [{ name: '', kind: 'text' }];
+  assert.deepEqual(lib.missingFields('inquiry', inquiry({ fields: empty })), ['フォームの質問項目']);
+  assert.deepEqual(lib.missingFields('inquiry', inquiry({ fields: empty, form_url: FORM })), []);
+  assert.deepEqual(lib.missingFields('inquiry', inquiry({ fields: empty, form_url: '  ' })), ['フォームの質問項目'], '空白だけは空');
+  assert.deepEqual(lib.missingFields('inquiry', inquiry({ form_url: '' })), [], '質問項目があれば URL は要らない');
+});
+
+test('フォームの URL の形: docs.google.com/forms/ と forms.gle/ だけを受け付ける', () => {
+  for (const u of [FORM, FORM_LONG, ' ' + FORM + ' ']) {
+    assert.equal(lib.isFormUrl(u), true, u);
+    assert.deepEqual(lib.missingFields('inquiry', inquiry({ form_url: u })), [], u);
+  }
+  for (const u of ['http://forms.gle/abc', 'https://forms.gle/', 'forms.gle/abc', 'https://docs.google.com/document/d/x', 'https://forms.gle.evil.jp/x', 'https://company.co.jp/form', 'https://forms.gle/a b', 'フォームはあります']) {
+    assert.equal(lib.isFormUrl(u), false, u);
+    const r = lib.buildSummary('inquiry', inquiry({ fields: [], form_url: u }));
+    assert.equal(r.ok, false, u);
+    assert.deepEqual(r.missing, [lib.FORM_URL_INVALID], u + '（形が違う URL では質問項目の代わりにならない）');
+  }
+  assert.equal(lib.FORM_URL_INVALID, 'Google フォームの公開用の URL を貼ってください');
+});
+
+test('フォームの URL: 編集用の URL は注意し、文章は作る', () => {
+  const edit = 'https://docs.google.com/forms/d/1AbCexample/edit';
+  for (const u of [edit, edit + '#responses', edit + '?usp=sharing']) {
+    const r = lib.buildSummary('inquiry', inquiry({ fields: [], form_url: u }));
+    assert.equal(r.ok, true, u);
+    assert.equal(r.warnings.length, 1, u);
+    assert.match(r.warnings[0], /回答用の URL（右上の「送信」→リンク）にしてください/);
+  }
+  assert.equal(lib.isEditFormUrl(FORM_LONG), false);
+});
+
+test('フォームの URL の欄は、URL らしいものの注意をしない', () => {
+  assert.deepEqual(lib.findWarnings('inquiry', inquiry({ form_url: FORM })), []);
+  assert.deepEqual(lib.findWarnings('inquiry', inquiry({ form_url: FORM_LONG })), []);
+  assert.equal(lib.findWarnings('inquiry', inquiry({ form_url: FORM, notes: '前のフォーム: ' + FORM })).length, 1, 'ほかの欄の URL は今までどおり注意する');
+});
+
+test('フォームの URL: 読む部分と開発用の部分', () => {
+  const r = lib.buildSummary('inquiry', inquiry({ fields: [], form_url: FORM }));
+  assert.equal(r.ok, true);
+  const { human, dev } = split(r.text);
+  assert.match(human, /■ フォームの質問項目\n・フォームの URL: https:\/\/forms\.gle\/AbCdEf123（質問名はこちらで読み取ります）\n/);
+  assert.match(dev, /\nfields: \[\]\nform_url: "https:\/\/forms\.gle\/AbCdEf123"\n/);
+  const both = lib.buildSummary('inquiry', inquiry({ form_url: FORM }));
+  assert.match(both.text, /■ フォームの質問項目（2 件）\n・お名前（記述式）\n・お問い合わせの種類（ラジオボタン）\n・フォームの URL: /);
+  const none = lib.buildSummary('inquiry', inquiry());
+  assert.match(none.text, /\nform_url: null\n/);
+  assert.doesNotMatch(none.text, /フォームの URL/);
+});
+
 // ---------- 外部への送信がないこと（静的テスト） ----------
 
 const pageFiles = fs.readdirSync(DIR).filter((f) => /\.(html|js)$/.test(f));
@@ -296,6 +381,19 @@ test('質問のページは、lib のすべての質問の欄と、ボタン・�
     for (const id of ['build', 'copy', 'out']) assert.ok(s.includes(`id="${id}"`), `${job}: ${id}`);
     assert.doesNotMatch(s, /type="file"/, 'ファイルの選択は置かない');
   }
+});
+
+test('A のページに、まとめて貼る欄と、URL の欄（リンクにしない）がある', () => {
+  const s = fs.readFileSync(path.join(DIR, 'inquiry.html'), 'utf8');
+  for (const id of ['paste', 'paste-rows', 'form_url']) assert.ok(s.includes(`id="${id}"`), id);
+  assert.ok(s.includes('質問名を 1 行に 1 つずつ貼ってください'));
+  assert.ok(s.includes('>行にする<'));
+  assert.ok(s.includes('公開中のフォームの URL を書いていただければ、こちらで開いて質問名を読み取ります。その場合は 03 を空のままにして構いません。'));
+  assert.match(s, /<input type="text" id="form_url"/, 'URL の欄は type="url" にしない（ただの文字）');
+  const ui = fs.readFileSync(path.join(DIR, 'hearing-ui.js'), 'utf8');
+  assert.doesNotMatch(ui, /\.href\b|setAttribute\(\s*['"]href|createElement\(\s*['"]a['"]|innerHTML/, 'URL をリンクにしない');
+  // 種類の初期値は、いちばん上の選択肢（記述式）
+  assert.match(s, /<select data-part="kind"[^>]*>\s*<option value="text">記述式<\/option>/);
 });
 
 test('docs/hearing は CI の matrix に入っている', () => {
