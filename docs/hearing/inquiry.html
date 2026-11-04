@@ -49,9 +49,17 @@
   </div>
 
   <div class="q" data-q="fields">
-    <div class="qlabel"><span class="no">03</span><h2>フォームの質問項目</h2><span class="tag req">必須</span></div>
+    <div class="qlabel"><span class="no">03</span><h2>フォームの質問項目</h2><span class="tag req">必須</span><span class="tag">URL があれば任意</span></div>
     <div>
       <p class="hint">フォームに並んでいる質問名を、そのままの文字で書いてください。行は「行を足す」で増やせます。</p>
+      <div class="paste">
+        <p class="hint">質問名を 1 行に 1 つずつ貼ってください。</p>
+        <textarea id="paste" aria-label="質問名をまとめて貼る欄" placeholder="例:&#10;お名前&#10;メールアドレス&#10;お問い合わせ内容"></textarea>
+        <div class="bar">
+          <button type="button" id="paste-rows">行にする</button>
+          <span class="copied" id="pasted" aria-live="polite"></span>
+        </div>
+      </div>
       <div class="rows" data-initial='["", "", ""]'></div>
       <template>
         <div class="row">
@@ -73,8 +81,16 @@
     </div>
   </div>
 
+  <div class="q" data-q="form_url">
+    <div class="qlabel"><span class="no">04</span><h2>フォームの URL（公開中なら）</h2><span class="tag">任意</span></div>
+    <div>
+      <input type="text" id="form_url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="例: forms.gle/… で始まる、回答用の URL" aria-label="フォームの URL">
+      <p class="hint">公開中のフォームの URL を書いていただければ、こちらで開いて質問名を読み取ります。その場合は 03 を空のままにして構いません。</p>
+    </div>
+  </div>
+
   <div class="q" data-q="notify_to">
-    <div class="qlabel"><span class="no">04</span><h2>担当者への通知先</h2><span class="tag req">必須</span></div>
+    <div class="qlabel"><span class="no">05</span><h2>担当者への通知先</h2><span class="tag req">必須</span></div>
     <div>
       <input type="text" id="notify_to" inputmode="email" autocomplete="off" placeholder="例: tanto@example.com" aria-label="担当者への通知先">
       <p class="hint">見本のアドレス（○○@example.com）にしてください。本番の宛先は、最後にご自身で設定していただきます。</p>
@@ -82,14 +98,14 @@
   </div>
 
   <div class="q" data-q="auto_reply_subject">
-    <div class="qlabel"><span class="no">05</span><h2>自動返信の件名</h2><span class="tag req">必須</span><span class="tag">スタンダード以上</span></div>
+    <div class="qlabel"><span class="no">06</span><h2>自動返信の件名</h2><span class="tag req">必須</span><span class="tag">スタンダード以上</span></div>
     <div>
       <input type="text" autocomplete="off" placeholder="例: お問い合わせを受け付けました" aria-label="自動返信の件名">
     </div>
   </div>
 
   <div class="q" data-q="auto_reply_body">
-    <div class="qlabel"><span class="no">06</span><h2>自動返信の本文</h2><span class="tag req">必須</span><span class="tag">スタンダード以上</span></div>
+    <div class="qlabel"><span class="no">07</span><h2>自動返信の本文</h2><span class="tag req">必須</span><span class="tag">スタンダード以上</span></div>
     <div>
       <textarea aria-label="自動返信の本文" placeholder="例: 山田 太郎 様&#10;お問い合わせありがとうございます。2 営業日以内にご連絡します。&#10;見本株式会社"></textarea>
       <p class="hint">問い合わせた人に届く文です。名前・会社名は見本の値で構いません。電話番号や URL は「（電話番号）」のように書いてください。</p>
@@ -97,7 +113,7 @@
   </div>
 
   <div class="q" data-q="id_format">
-    <div class="qlabel"><span class="no">07</span><h2>受付番号の形</h2><span class="tag">任意</span></div>
+    <div class="qlabel"><span class="no">08</span><h2>受付番号の形</h2><span class="tag">任意</span></div>
     <div>
       <input type="text" autocomplete="off" placeholder="例: INQ-20261026-001" aria-label="受付番号の形">
       <p class="hint">希望がなければ空のままで構いません。</p>
@@ -105,7 +121,7 @@
   </div>
 
   <div class="q" data-q="routing">
-    <div class="qlabel"><span class="no">08</span><h2>振り分けの条件</h2><span class="tag req">必須</span><span class="tag">プレミアム</span></div>
+    <div class="qlabel"><span class="no">09</span><h2>振り分けの条件</h2><span class="tag req">必須</span><span class="tag">プレミアム</span></div>
     <div>
       <textarea aria-label="振り分けの条件" placeholder="例: 「お問い合わせの種類」が「見積もり」なら sales@example.com へ"></textarea>
       <p class="hint">どの質問の、どの答えなら、どこへ知らせるかを書いてください。宛先は見本のアドレスで構いません。</p>
@@ -113,7 +129,7 @@
   </div>
 
   <div class="q" data-q="deadline">
-    <div class="qlabel"><span class="no">09</span><h2>希望の納期</h2><span class="tag">任意</span></div>
+    <div class="qlabel"><span class="no">10</span><h2>希望の納期</h2><span class="tag">任意</span></div>
     <div>
       <input type="text" autocomplete="off" placeholder="例: 11 月 20 日ごろ" aria-label="希望の納期">
       <p class="hint">ご購入時の納期より早めたいときなどに書いてください。</p>
@@ -121,7 +137,7 @@
   </div>
 
   <div class="q" data-q="notes">
-    <div class="qlabel"><span class="no">10</span><h2>そのほか</h2><span class="tag">任意</span></div>
+    <div class="qlabel"><span class="no">11</span><h2>そのほか</h2><span class="tag">任意</span></div>
     <div>
       <textarea aria-label="そのほか" placeholder="気になっていること、今のやり方で困っていることなど"></textarea>
     </div>
