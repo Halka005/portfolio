@@ -46,7 +46,8 @@
   const QUESTIONS = {
     inquiry: [
       ...COMMON_HEAD,
-      { key: 'fields', label: 'フォームの質問項目', type: 'rows', required: true },
+      { key: 'fields', label: 'フォームの質問項目', type: 'rows', required: true, orKey: 'form_url' },
+      { key: 'form_url', label: 'フォームの URL', type: 'url', required: false },
       { key: 'notify_to', label: '担当者への通知先', type: 'email', required: true },
       { key: 'auto_reply_subject', label: '自動返信の件名', type: 'text', required: true, show: atLeast('standard') },
       { key: 'auto_reply_body', label: '自動返信の本文', type: 'text', required: true, show: atLeast('standard') },
@@ -100,6 +101,40 @@
     return visibleQuestions(jobType, answers).filter((q) => q.required).map((q) => q.key);
   }
 
+  // ---------- フォームの URL（ただの文字として扱い、開かない） ----------
+
+  const FORM_URL_RE = /^(?:https:\/\/docs\.google\.com\/forms\/|https:\/\/forms\.gle\/)\S+$/;
+  const FORM_URL_INVALID = 'Google フォームの公開用の URL を貼ってください';
+
+  function isFormUrl(v) {
+    return FORM_URL_RE.test(str(v));
+  }
+
+  function isEditFormUrl(v) {
+    return isFormUrl(v) && /\/edit(?:[/?#]|$)/.test(str(v));
+  }
+
+  // ---------- 質問名のまとめて貼り付け ----------
+
+  const MAX_QUESTION_LINES = 30;
+  const BULLET_RE = /^[・\-*＊•●○◯■□◆◇▪▫►▸‐－–—]+\s*/;
+  const NUMBER_RE = /^(?:[(（]\s*[0-9０-９]{1,3}\s*[)）]|[0-9０-９]{1,3}\s*[.．、)）:：](?![0-9０-９])|[①-⑳㉑-㉟])\s*/;
+  const REQUIRED_MARK_RE = /\s*[*＊]+$/;
+
+  // 1 行に 1 つの質問名を、行の名前の一覧にする（記号・番号・必須の印・空の行・重複を除く）
+  function parseQuestionLines(text) {
+    const out = [];
+    for (const line of String(text === undefined || text === null ? '' : text).split(/\r\n|\r|\n/)) {
+      let s = line.trim();
+      for (let i = 0; i < 2; i++) s = s.replace(BULLET_RE, '').replace(NUMBER_RE, '');
+      s = s.replace(REQUIRED_MARK_RE, '').trim();
+      if (s === '' || out.includes(s)) continue;
+      out.push(s);
+      if (out.length >= MAX_QUESTION_LINES) break;
+    }
+    return out;
+  }
+
   function isEmpty(q, v) {
     if (q.type === 'rows') return rows(v).length === 0;
     if (q.type === 'checks') return !Array.isArray(v) || v.length === 0;
@@ -110,9 +145,12 @@
   // 必須なのに空の欄の名前の一覧
   function missingFields(jobType, answers) {
     const a = answers || {};
-    return visibleQuestions(jobType, a)
-      .filter((q) => q.required && isEmpty(q, a[q.key]))
-      .map((q) => q.label);
+    const out = [];
+    for (const q of visibleQuestions(jobType, a)) {
+      if (q.required && isEmpty(q, a[q.key]) && !(q.orKey && str(a[q.orKey]) !== '')) out.push(q.label);
+      if (q.type === 'url' && str(a[q.key]) !== '' && !isFormUrl(a[q.key])) out.push(FORM_URL_INVALID);
+    }
+    return out;
   }
 
   // ---------- 連絡先らしいものの検査 ----------
@@ -183,6 +221,11 @@
         }
         continue;
       }
+      if (q.type === 'url') {
+        // この欄は URL を書く欄なので、URL らしいものの注意はしない
+        if (isEditFormUrl(v)) out.push(`「${q.label}」は編集用の URL です。回答用の URL（右上の「送信」→リンク）にしてください。`);
+        continue;
+      }
       let text = '';
       if (q.type === 'text') text = str(v);
       else if (q.type === 'rows') text = rows(v).map((r) => r.name).join('\n');
@@ -203,7 +246,7 @@
 
   const DEV_LINE = '----- 開発用（このまま貼ってください）-----';
   const DEV_KEYS = {
-    inquiry: ['job_type', 'plan', 'google_account', 'deadline', 'fields', 'notify_to', 'auto_reply', 'id_format', 'routing', 'notes'],
+    inquiry: ['job_type', 'plan', 'google_account', 'deadline', 'fields', 'form_url', 'notify_to', 'auto_reply', 'id_format', 'routing', 'notes'],
     invoice: ['job_type', 'plan', 'google_account', 'deadline', 'line_items', 'source', 'issuer_fields', 'due_rule', 'rounding', 'draft', 'logo', 'sample', 'notes'],
   };
 
@@ -249,8 +292,9 @@
     const show = (k) => isVisible('inquiry', k, a);
     const f = rows(a.fields);
     const lines = humanCommonHead('inquiry', a);
-    lines.push('', `■ フォームの質問項目（${f.length} 件）`);
+    lines.push('', f.length ? `■ フォームの質問項目（${f.length} 件）` : '■ フォームの質問項目');
     for (const r of f) lines.push(`・${r.name}（${FIELD_KINDS[r.kind] || FIELD_KINDS.other}）`);
+    if (str(a.form_url) !== '') lines.push(`・フォームの URL: ${str(a.form_url)}（質問名はこちらで読み取ります）`);
     lines.push('', '■ 担当者への通知先', `・${str(a.notify_to)}`);
     if (show('auto_reply_subject')) {
       lines.push('', '■ 自動返信', `・件名: ${str(a.auto_reply_subject)}`, '・本文:', indentBlock(str(a.auto_reply_body), '  '));
@@ -301,10 +345,12 @@
   function devInquiry(a) {
     const show = (k) => isVisible('inquiry', k, a);
     const lines = devCommonHead('inquiry', a);
-    lines.push('fields:');
-    for (const r of rows(a.fields)) {
+    const f = rows(a.fields);
+    lines.push(f.length ? 'fields:' : 'fields: []');
+    for (const r of f) {
       lines.push(`  - name: ${y(r.name)}`, `    type: ${FIELD_KINDS[r.kind] ? r.kind : 'other'}`);
     }
+    lines.push(`form_url: ${str(a.form_url) === '' ? 'null' : y(str(a.form_url))}`);
     lines.push(`notify_to: ${y(str(a.notify_to))}`);
     if (show('auto_reply_subject')) {
       lines.push('auto_reply:', `  subject: ${y(str(a.auto_reply_subject))}`, `  body: ${y(str(a.auto_reply_body))}`);
@@ -351,6 +397,7 @@
 
   const api = {
     PLAN_ORDER, PLAN_LABELS, FIELD_KINDS, ISSUER_LABELS, DEV_LINE, DEV_KEYS,
+    MAX_QUESTION_LINES, FORM_URL_INVALID, parseQuestionLines, isFormUrl, isEditFormUrl,
     questions, isVisible, visibleQuestions, requiredKeys, missingFields,
     findContactLike, isSampleEmailList, findWarnings, validate, buildSummary,
   };
