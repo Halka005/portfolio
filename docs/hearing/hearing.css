@@ -133,3 +133,8 @@ footer .wrap { padding-top: 20px; padding-bottom: 32px; font-size: 12px; color: 
   .row select { grid-column: 2 / 3; }
   .row .del { grid-row: 1; grid-column: 3; }
 }
+
+/* 質問名のまとめて貼り付け */
+.paste { margin: 0 0 16px; }
+.paste textarea { min-height: 7.5em; }
+.paste .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 8px; }
